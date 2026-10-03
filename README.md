@@ -1,89 +1,220 @@
-# UNIVERSIDAD ESTATAL AMAZÓNICA
+# UNIVERSIDAD ESTATAL AMAZONICA
 
-## CARRERA DE TECNOLOGÍAS DE LA INFORMACIÓN
+Carrera de Tecnologias de la Informacion
+Programacion Orientada a Objetos
 
-### PROGRAMACIÓN ORIENTADA A OBJETOS
+Profesor: Mgs. Luis Antonio Llerena Ocaña
+Alumno: Danny Henry Betancourt Luzon
 
-### SEMANA 04
-
-### TEMA: Sistema de Gestión de Restaurante
-
-**Alumno:** Danny Henry Betancourt Luzón
-**Año:** 2026
-
+USUARIOS DEL SISTEMA
+Danny Betancourt  Administrador
+USUARIO: 1101234567 contraseña 1234
+Carlos Perez rol Empleado
+USUARIO: 1107654321, contraseña 1234
+Maria Jaramillo rol Cliente
+USUARIO:1123456789, contraseña 1234, 
 ---
 
-# Sistema de Gestión de Restaurante
+# Sistema de Restaurante - restaurante_app
 
-## Descripción del sistema
+## De que se trata esta entrega
 
-El presente proyecto consiste en el desarrollo de un sistema básico de gestión de restaurante utilizando Programación Orientada a Objetos (POO) en Python. El sistema permite administrar productos y clientes registrados, además de realizar pedidos seleccionando clientes y productos existentes mediante un menú interactivo en consola.
+Esta semana se siguio trabajando sobre el mismo proyecto de siempre, sin
+reconstruir nada. Se conserva el login, el menu lateral, la gestion de
+productos, el registro de ventas y la identidad visual con el logo de
+fondo. Lo que cambio fue la seccion Usuarios: antes se manejaba con un
+formulario y botones sueltos (Registrar, Cargar, Actualizar, Eliminar,
+Limpiar), y ahora pasa a responder tambien a eventos directos sobre la
+tabla y el teclado, ademas de incorporar un rol para cada persona.
 
-La aplicación tiene como finalidad poner en práctica los conceptos fundamentales de la programación orientada a objetos, tales como clases, objetos, atributos, métodos, encapsulación, abstracción y modularización del software.
+La idea de esta semana era justamente esa: ver la diferencia entre un
+boton con command= y un evento capturado con bind(), y como ambos
+terminan llamando a los mismos metodos del servicio sin repetir logica.
 
-# Estructura del Proyecto
+## Roles
 
+Se agrego el atributo rol al modelo Usuario, con tres valores posibles:
+Administrador, Empleado y Cliente.
+
+Solo quien tiene el rol Administrador ve la opcion Usuarios en el menu
+lateral y puede entrar a esa gestion. Un Empleado o un Cliente ven
+Productos y Ventas igual que siempre, pero no tienen acceso a la
+administracion de usuarios.
+
+Desde el formulario de Usuarios no se pueden crear cuentas nuevas con
+rol Administrador, para evitar que cualquiera se de permisos de
+administrador por accidente. Tampoco se permite que la cuenta con la que
+se inicio sesion se cambie su propio rol, ni que se elimine a si misma
+mientras esta conectada. Estas tres reglas se revisan en
+RestauranteServicio, no en la interfaz.
+
+## Lo que cambio en la gestion de usuarios
+
+La tabla de usuarios ahora responde directamente al hacer clic en una
+fila: no hace falta escribir el identificador ni presionar un boton
+Cargar, los datos de esa persona aparecen solos en el formulario. El
+boton Cargar que existia antes ya no hace falta y se quito.
+
+Tambien se puede presionar Enter desde cualquier campo del formulario
+para registrar, y Escape para limpiar todo y quitar la seleccion de la
+tabla. El selector de rol avisa cuando cambia de opcion.
+
+Los botones Registrar, Actualizar, Eliminar y Limpiar se mantienen
+como estaban, usando command=.
+
+## Eventos que se usaron y donde
+
+<<TreeviewSelect>>: se asocia a la tabla de usuarios con bind(). Cuando
+se selecciona una fila, se toma el identificador de esa fila, se busca
+el usuario completo con RestauranteServicio y se llenan los campos del
+formulario. La tabla nunca guarda la contraseña, asi que ese dato se
+obtiene siempre desde el servicio, no desde lo que se ve en pantalla.
+
+<Return>: se asocia a cada campo del formulario. Al presionarlo se
+llama al mismo metodo que usa el boton Registrar, no se repite la
+logica en otro lado.
+
+<Escape>: se asocia tambien a los campos del formulario. Llama al mismo
+metodo que usa el boton Limpiar.
+
+<<ComboboxSelected>>: se asocia al selector de rol. Cuando cambia de
+valor, se muestra un mensaje simple confirmando el rol elegido.
+
+## Como quedo el flujo
+
+Se selecciona una fila en la tabla, eso dispara el evento
+<<TreeviewSelect>>, bind() ejecuta el callback correspondiente, ese
+callback le pide el usuario a RestauranteServicio usando el
+identificador de la fila, y el resultado se muestra llenando el
+formulario. Para guardar un cambio, se presiona Actualizar (o Enter),
+eso llama al servicio, el servicio valida las reglas, guarda en
+usuarios.json, y la tabla se vuelve a dibujar con la informacion
+actualizada.
+
+## Estilo visual
+
+La pantalla de acceso se rehizo como una tarjeta blanca centrada, con el
+logo arriba, el nombre del sistema, los campos de identificacion y
+contraseña con una linea debajo en vez de un recuadro completo, y un
+boton celeste de ancho completo para iniciar sesion. El resto de la
+aplicacion (encabezado, menu lateral, formularios, tablas) se paso a
+una paleta de colores pastel en tonos verde agua y crema, en vez de los
+colores oscuros que tenia antes. Los iconos del menu y el logo siguen
+siendo los mismos archivos de la carpeta assets que ya se usaban.
+
+## Estructura del proyecto
+
+```
 restaurante_app/
+├── datos/
+│   ├── productos.json
+│   ├── usuarios.json
+│   └── ventas.json
 ├── modelos/
+│   ├── __init__.py
 │   ├── producto.py
-│   └── cliente.py
+│   ├── usuario.py
+│   └── venta.py
 ├── servicios/
-│   └── restaurante.py
-└── main.py
+│   ├── __init__.py
+│   ├── archivo_servicio.py
+│   └── restaurante_servicio.py
+├── ui/
+│   ├── __init__.py
+│   ├── fondo_marca_agua.py
+│   ├── login_view.py
+│   └── main_view.py
+├── assets/
+│   ├── icons/
+│   │   ├── productos.png
+│   │   ├── usuarios.png
+│   │   ├── ventas.png
+│   │   └── salir.png
+│   ├── icono_sabor_lojano.ico
+│   ├── logo_sabor_lojano.jpg
+│   └── marca_agua_sabor_lojano.png
+├── main.py
+└── README.md
+```
 
+## Usuarios y contraseñas para ingresar al sistema
 
-## Explicación de la estructura
+identificacion 1101234567, contraseña 1234, Danny Betancourt, rol
+Administrador
 
-### modelos/producto.py
+identificacion 1107654321, contraseña 1234, Carlos Perez, rol Empleado
 
-Contiene la clase `Producto`, encargada de representar los productos disponibles en el restaurante, tales como platos principales, bebidas y postres.
+identificacion 1123456789, contraseña 1234, Maria Jaramillo, rol Cliente
 
-### modelos/cliente.py
+Con el usuario de Danny se puede entrar a Usuarios. Con los otros dos
+no aparece esa opcion en el menu.
 
-Contiene la clase `Cliente`, utilizada para almacenar la información de los clientes registrados en el sistema.
+## Correccion del acceso
 
-### servicios/restaurante.py
+Hubo un problema que impedia iniciar sesion aunque la contraseña fuera
+correcta. Pasaba porque el modelo de usuario empezo a pedir el campo
+rol, y si un registro guardado antes no lo tenia, el sistema lo
+descartaba al cargar en vez de dejarlo entrar, asi que la persona nunca
+aparecia como valida y el login siempre terminaba en "credenciales
+incorrectas". Ahora, si un usuario guardado no trae el rol, se le
+asigna Cliente por defecto en lugar de descartarlo, para que el acceso
+no se rompa. Si alguno de los usuarios deberia ser Administrador,
+conviene revisar que su registro en usuarios.json tenga
+"rol": "Administrador" escrito de forma explicita.
 
-Contiene la clase `Restaurante`, responsable de gestionar las operaciones principales del sistema, incluyendo el registro de productos, clientes y la toma de pedidos.
+## Productos cargados
 
-### main.py
+Humitas, categoria Comida, precio 1.50, stock 15
 
-Es el punto de entrada de la aplicación. Desde este archivo se crean los objetos, se registran los datos iniciales y se ejecuta el menú principal del sistema.
+Jugo de tomate, categoria Bebida, precio 1.50, stock 20
 
+Repe Lojano, categoria Comida, precio 1.25, stock 30
 
-# Funcionalidades implementadas
+## Como se ejecuta
 
-* Registro de productos.
-* Registro de clientes.
-* Visualización de productos disponibles.
-* Visualización de clientes registrados.
-* Selección de clientes para realizar pedidos.
-* Registro de pedidos mediante un ciclo repetitivo.
-* Cálculo automático del total de la orden.
-* Presentación organizada de la información en consola.
-* Uso de constructores `__init__()`.
-* Uso del método especial `__str__()`.
-* Aplicación de importaciones entre módulos.
+Se necesita Python con Tkinter y con la libreria Pillow instalada
+(pip install pillow), porque de ahi se cargan el logo, la marca de agua
+y los iconos del menu.
 
+Desde la carpeta restaurante_app se corre:
 
-# Comentarios relevantes del código
+python3 main.py
 
-El proyecto incluye comentarios que facilitan la comprensión del funcionamiento de cada componente:
+Se entra con cualquiera de los usuarios de la tabla de arriba.
 
-* Definición de clases y atributos.
-* Métodos para registrar y mostrar información.
-* Gestión de pedidos mediante ciclos repetitivos.
-* Importación de módulos y creación de objetos.
-* Organización de la lógica principal del programa.
+## Pruebas que se hicieron
 
-Estos comentarios permiten identificar claramente la responsabilidad de cada sección del código.
+Se entro como Danny (Administrador) y se confirmo que la opcion
+Usuarios aparece en el menu y se puede usar sin errores.
 
-# Reflexión
+Se selecciono una fila en la tabla de usuarios y se confirmo que el
+formulario se llenara solo con los datos de esa persona.
 
-La modularización del software es una práctica fundamental en el desarrollo de aplicaciones porque permite dividir un sistema en componentes independientes y organizados. Esta separación de responsabilidades facilita la comprensión del código, mejora su mantenimiento y favorece la reutilización de funcionalidades en futuros proyectos.
+Se presiono Escape y se confirmo que el formulario quedara vacio y la
+seleccion de la tabla se quitara.
 
-En este sistema de gestión de restaurante, la división en carpetas y módulos permitió mantener una estructura clara, donde cada clase cumple una función específica. Gracias a ello, el programa resulta más ordenado, escalable y fácil de modificar sin afectar el funcionamiento general de la aplicación.
+Se registro un usuario nuevo con rol Cliente presionando Enter desde el
+formulario, en vez de hacer clic en el boton, y se confirmo que se
+guardara igual.
 
-# Repositorio
+Se cambio el rol en el selector y se vio el mensaje de confirmacion del
+cambio.
 
-Para la entrega de esta actividad, el proyecto se almacena en un repositorio público de GitHub que contiene todos los archivos requeridos, respetando la estructura solicitada y permitiendo el acceso para revisión y evaluación.
+Se intento registrar un usuario con rol Administrador desde el
+formulario y el sistema lo rechazo.
+
+Se intento cambiar el propio rol de la cuenta conectada y el sistema lo
+rechazo.
+
+Se intento eliminar la cuenta con la que se habia iniciado sesion y el
+sistema lo rechazo.
+
+Se elimino un usuario distinto al propio y se confirmo que desaparecia
+de la tabla, con su confirmacion previa.
+
+Se cerro sesion y se entro como Carlos (Empleado) y como Maria
+(Cliente), confirmando en ambos casos que la opcion Usuarios no
+aparece en el menu, pero Productos y Ventas siguen funcionando igual.
+
+Se cerro el programa y se volvio a abrir, confirmando que los usuarios
+y sus roles se mantuvieran guardados en usuarios.json.
